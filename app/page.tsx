@@ -44,7 +44,7 @@ export default function Home() {
     setError(null);
     setResults([]);
     try {
-      const res = await fetch(`http://localhost:8000/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`https://api.try-nippy.com/search?q=${encodeURIComponent(query)}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       const shoppingResults = data.shopping_results || [];
