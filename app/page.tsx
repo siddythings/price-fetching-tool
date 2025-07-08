@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import locations from "../location.json";
 
 // Define a type for product results
 type ProductResult = {
@@ -13,6 +14,11 @@ type ProductResult = {
   snippet?: string;
   rating?: number;
   reviews?: number;
+};
+
+type LocationOption = {
+  country_code: string;
+  country_name: string;
 };
 
 function renderStars(rating: number) {
@@ -38,13 +44,25 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'products' | 'json'>('products');
   const [error, setError] = useState<string | null>(null);
 
+  // Flatten location options (country/state)
+  const locationOptions: LocationOption[] = Array.isArray(locations)
+    ? locations
+    : Array.isArray(locations[0])
+    ? locations[0]
+    : [];
+  const [location, setLocation] = useState<string>("us");
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSearching(true);
     setError(null);
     setResults([]);
     try {
-      const res = await fetch(`https://api.try-nippy.com/search?q=${encodeURIComponent(query)}`);
+      const selectedCountry = locationOptions.find(l => l.country_code === location);
+      const locationName = selectedCountry ? selectedCountry.country_name : '';
+      const res = await fetch(
+        `http://localhost:8000/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(locationName)}&country_code=${encodeURIComponent(location)}`
+      );
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       const shoppingResults = data.shopping_results || [];
@@ -53,7 +71,7 @@ export default function Home() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Unknown error');
+        setError("Unknown error");
       }
     } finally {
       setSearching(false);
@@ -136,15 +154,24 @@ export default function Home() {
             onSubmit={handleSearch}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 700, maxWidth: '95vw', marginBottom: 32 }}
           >
-            <div style={{ display: 'flex', width: '100%' }}>
+            <div style={{ display: 'flex', width: '100%', gap: 8 }}>
               <input
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search products..."
-                style={{ flex: 1, padding: '14px 18px', fontSize: 18, border: '1px solid #ddd', borderRadius: '8px 0 0 8px', outline: 'none', background: '#f8fafb' }}
+                style={{ flex: 2, padding: '14px 18px', fontSize: 18, border: '1px solid #ddd', borderRadius: '8px 0 0 8px', outline: 'none', background: '#f8fafb' }}
                 autoFocus
               />
+              <select
+                value={location}
+                onChange={e => setLocation(e.target.value)}
+                style={{ flex: 1, fontSize: 16, border: '1px solid #ddd', borderRadius: 6, padding: '0 10px', background: '#f8fafb', color: '#232f3e', minWidth: 120 }}
+              >
+                {locationOptions.map((loc) => (
+                  <option key={loc.country_code} value={loc.country_code}>{loc.country_name}</option>
+                ))}
+              </select>
               <button
                 type="submit"
                 style={{ background: '#ff9900', color: '#232f3e', fontWeight: 700, fontSize: 18, border: 'none', borderRadius: '0 8px 8px 0', padding: '0 28px', cursor: 'pointer', transition: 'background 0.2s' }}

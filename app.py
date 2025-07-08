@@ -21,13 +21,14 @@ def search(
     q: str = Query(..., description="Search query, e.g. 'hone 16 Pro, 128GB'"),
     location: str = Query("Austin, Texas, United States", description="Location for the search"),
     device: str = Query("desktop", description="Device type for the search"),
+    country_code: str = Query("us", description="Country code for the search"),
 ):
     params = {
         "engine": "google",
         "q": q,
         "location": location,
         "google_domain": "google.com",
-        "gl": "us",
+        "gl": country_code,
         "hl": "en",
         "device": device,
         "api_key": SERPAPI_API_KEY,
