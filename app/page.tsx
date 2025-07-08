@@ -61,7 +61,7 @@ export default function Home() {
       const selectedCountry = locationOptions.find(l => l.country_code === location);
       const locationName = selectedCountry ? selectedCountry.country_name : '';
       const res = await fetch(
-        `http://localhost:8000/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(locationName)}&country_code=${encodeURIComponent(location)}`
+        `https://api.try-nippy.com/search?q=${encodeURIComponent(query)}&location=${encodeURIComponent(locationName)}&country_code=${encodeURIComponent(location)}`
       );
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
